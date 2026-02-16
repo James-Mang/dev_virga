@@ -1341,7 +1341,7 @@ class Atmosphere():
                     self.fsed.append(fsed[cond])
                 else:
                     raise ValueError("Missing fsed of " + cond)
-        self.fsed = np.asarray(self.fsed)  # we need to do math with this later
+        self.fsed = np.array(self.fsed, copy=True)  # we need to do math with this later
 
     def constants(self):
         #   Depth of the Lennard-Jones potential well for the atmosphere 
@@ -1415,8 +1415,8 @@ class Atmosphere():
             df = df.sort_values('pressure').copy()
 
         #convert bars to dyne/cm^2 
-        self.p_level = np.array(df['pressure'])*1e6
-        self.t_level = np.array(df['temperature'])      
+        self.p_level = np.array(df['pressure'].values, copy=True)*1e6
+        self.t_level = np.array(df['temperature'].values, copy=True)
         if alpha_pressure is None:
             self.alpha_pressure=min(df['pressure'])
         else:
@@ -1869,7 +1869,7 @@ def get_mie(gas, directory, aggregates=False, Df=None):
     nradii = int(df.iloc[0,1])
 
     #get the radii (all the rows where there the last three rows are nans)
-    radii = df.loc[np.isnan(df['qscat'])]['wave'].values
+    radii = df.loc[np.isnan(df['qscat'])]['wave'].values.copy()
 
     df = df.dropna()
 
@@ -1891,10 +1891,10 @@ def get_mie(gas, directory, aggregates=False, Df=None):
         df['qext'] = flipped_qext
         df['cos_qscat'] = flipped_cos_qscat
 
-    wave = df['wave'].values.copy().reshape((nradii,nwave)).T
-    qscat = df['qscat'].values.copy().reshape((nradii,nwave)).T
-    qext = df['qext'].values.copy().reshape((nradii,nwave)).T
-    cos_qscat = df['cos_qscat'].values.copy().reshape((nradii,nwave)).T
+    wave = df['wave'].values.reshape((nradii,nwave)).T.copy()
+    qscat = df['qscat'].values.reshape((nradii,nwave)).T.copy()
+    qext = df['qext'].values.reshape((nradii,nwave)).T.copy()
+    cos_qscat = df['cos_qscat'].values.reshape((nradii,nwave)).T.copy()
 
     # if scattering code returns Q_sca <0 (can happen for extreme examples, like very large particles with very low fractal dimensions), set Q_sca = 1e-16 (basically zero, 
     # but slighty positive so that calc_optics still records opacity in the optical depth array (opd) for purely absorbing cases -- the statement here 
